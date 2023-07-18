@@ -1,3 +1,5 @@
+from rumblet.classes.PetTypeChart import PetTypeChart
+
 # LEVELING SPEEDS ARE A RANGE FROM 1 TO 100
 
 def pet_templates():
@@ -5,6 +7,7 @@ def pet_templates():
         "Pichu": {
             "name": "Pichu",
             "sprite": None,
+            "type": PetTypeChart.grass,
             "health": 70,
             "defense": 20,
             "attack": 30,
@@ -20,6 +23,7 @@ def pet_templates():
         "Pikachu": {
             "name": "Pikachu",
             "sprite": None,
+            "type": PetTypeChart.grass,
             "health": 250,
             "defense": 160,
             "attack": 200,

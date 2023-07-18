@@ -1,5 +1,4 @@
-import pygame
-from rumblet.classes.Pet import Pet
+# import pygame
 
 
 GAME_NAME = "Rumblet"
@@ -8,13 +7,7 @@ SCREEN_HEIGHT = 600
 
 
 def main():
-    pichu = Pet(id=None, template_key="Pichu", level=1, experience=0, nickname="adjustednickname", move_1_key="Splash")
-    target_pikachu = Pet(id=None, template_key="Pikachu", level=16, experience=0, nickname="Target Pikachu")
-
-    adjusted_experience = pichu.speed_adjust_experience(1_000_000)
-    print(adjusted_experience)
-    pichu.give_experience(adjusted_experience)
-
+    pass
     # pygame.init()
     # screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # pygame.display.set_caption(GAME_NAME)

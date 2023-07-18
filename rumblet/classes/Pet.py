@@ -1,6 +1,6 @@
 from functools import reduce
 from rumblet.pet_templates import read_pet_template
-from rumblet.move_templates import read_move_template
+from rumblet.classes.MoveList import read_move_template
 
 
 MAX_LEVEL = 100
@@ -14,7 +14,7 @@ class Pet:
             health: int = None, defense: int = None, attack: int = None, speed: int = None,
             current_health: int = None, current_defense: int = None, current_attack: int = None,
             current_speed: int = None,
-            move_1_key: str = None, move_2_key: str = None, move_3_key: str = None, move_4_key: str = None
+            move_1_key: int = None, move_2_key: int = None, move_3_key: int = None, move_4_key: int = None
     ):
         self.id = id
         self.pet_template = read_pet_template(template_key)
