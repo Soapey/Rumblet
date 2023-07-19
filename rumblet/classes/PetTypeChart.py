@@ -12,6 +12,17 @@ class PetTypeChart:
     grass = types.get("Grass")
 
     @classmethod
+    def get_multiplier(cls, attacking_type, defending_type):
+        if attacking_type.name in defending_type.immunities:
+            return 0
+        elif defending_type.name in attacking_type.strengths:
+            return 2
+        elif defending_type.name in attacking_type.weaknesses:
+            return 0.5
+        else:
+            return 1
+
+    @classmethod
     def display_chart(cls):
         spacer = ' | '
         column_width = len(max(cls.types.keys(), key=len))
