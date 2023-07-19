@@ -9,7 +9,7 @@ class SpeciesList:
             type=PetTypeChart.grass,
             health=70,
             defense=20,
-            attack=20,
+            attack=0,
             speed=100,
             end_health=None,
             end_defense=None,
