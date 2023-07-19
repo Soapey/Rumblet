@@ -1,5 +1,9 @@
 from functools import reduce
 from rumblet.classes.SpeciesList import SpeciesList
+from rumblet.classes.db.SQLiteConnector import SQLiteConnector
+from rumblet.classes.PetMove import PetMove
+from rumblet.classes.MoveList import MoveList
+
 
 MAX_LEVEL = 100
 LEVEL_1_EXPERIENCE_REQUIRED = 100
@@ -12,6 +16,7 @@ class Pet:
             health: int = None, defense: int = None, attack: int = None, speed: int = None,
             current_health: int = None, current_defense: int = None, current_attack: int = None,
             current_speed: int = None,
+            move_1_name: str = None, move_2_name: str = None, move_3_name: str = None, move_4_name: str = None
     ):
         self.id = id
         self.player_id = player_id
@@ -31,12 +36,11 @@ class Pet:
         self.current_attack = current_attack or self.attack
         self.current_speed = current_speed or self.speed
 
-        self.moves = {
-            1: None,
-            2: None,
-            3: None,
-            4: None
-        }
+        self.move_1_name = move_1_name
+        self.move_2_name = move_2_name
+        self.move_3_name = move_3_name
+        self.move_4_name = move_4_name
+
 
     # How the class will appear to players in a string
     def __str__(self):
@@ -47,12 +51,54 @@ class Pet:
         attributes_string = ', '.join(f'{k}={v}' for k, v in vars(self).items())
         return f"{self.__class__.__name__}-{self.name}({attributes_string})"
 
-    def use_move(self, move_slot_number: int, target_pet):
-        move = self.moves.get(move_slot_number)
-        if not move:
-            print(f"Move slot {move_slot_number} is empty!")
+    def learn(self, move_key, move_slot_number):
+        if move_slot_number == 1:
+            move_to_replace_name = self.move_1_name
+        elif move_slot_number == 2:
+            move_to_replace_name = self.move_2_name
+        elif move_slot_number == 3:
+            move_to_replace_name = self.move_3_name
+        else:
+            move_to_replace_name = self.move_4_name
+
+        new_move_max_fuel = MoveList.moves.get(move_key).max_fuel
+        if move_to_replace_name:
+            move_to_replace = PetMove.get_by_pet_id_and_move_name(self.id, move_to_replace_name)
+            new_move = PetMove(id=move_to_replace.id, pet_id=self.id, move_name=move_key, current_fuel=new_move_max_fuel)
+            new_move.update()
+        else:
+            new_move = PetMove(id=None, pet_id=self.id, move_name=move_key, current_fuel=new_move_max_fuel)
+            new_move.insert()
+
+        if move_slot_number == 1:
+            self.move_1_name = new_move.move_name
+        elif move_slot_number == 2:
+            self.move_2_name = new_move.move_name
+        elif move_slot_number == 3:
+            self.move_3_name = new_move.move_name
+        else:
+            self.move_4_name = new_move.move_name
+
+    def use_move(self, move_slot_number, target_pet):
+        if move_slot_number == 1:
+            move_name = self.move_1_name
+        elif move_slot_number == 2:
+            move_name = self.move_2_name
+        elif move_slot_number == 3:
+            move_name = self.move_3_name
+        else:
+            move_name = self.move_4_name
+
+        if not move_name:
             return
-        move.use(target_pet)
+
+        pet_move = PetMove.get_by_pet_id_and_move_name(self.id, move_name)
+
+        if pet_move.current_fuel < 1:
+            print(f"{pet_move.move_name} is out of fuel!")
+            return
+
+        pet_move.use(self, target_pet)
 
     def speed_adjust_experience(self, experience):
         return experience * (self.species.leveling_speed / 100)
@@ -155,6 +201,45 @@ class Pet:
                 self.evolve()
             else:
                 self.update_stat_levels()
+
+    def insert(self):
+        with SQLiteConnector() as cur:
+            query = '''
+                INSERT INTO pet (player_id, species_name, level, experience, nickname, health, defense, attack, speed, current_health, current_defense, current_attack, current_speed, move_1_name, move_2_name, move_3_name, move_4_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            '''
+            values = (self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health, self.defense, self.attack, self.speed, self.current_health, self.current_defense, self.current_attack, self.current_speed, self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name)
+            cur.execute(query, values)
+            self.id = cur.lastrowid
+
+    def update(self):
+        with SQLiteConnector() as cur:
+            query = '''
+                UPDATE pet
+                SET player_id = ?, species_name = ?, level = ?, experience = ?, nickname = ?, health = ?, defense = ?, attack = ?, speed = ?, current_health = ?, current_defense = ?, current_attack = ?, current_speed = ?, move_1_name = ?, move_2_name = ?, move_3_name = ?, move_4_name = ?
+                WHERE id = ?
+            '''
+            values = (self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health, self.defense, self.attack, self.speed, self.current_health, self.current_defense, self.current_attack, self.current_speed, self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.id)
+            cur.execute(query, values)
+
+    @classmethod
+    def delete(cls, id):
+        with SQLiteConnector() as cur:
+            query = f"DELETE FROM pet WHERE id = ?"
+            values = (id,)
+            cur.execute(query, values)
+
+    @classmethod
+    def get_by_id(cls, id):
+        with SQLiteConnector() as cur:
+            query = '''
+                SELECT * FROM pet
+                WHERE id = ?
+            '''
+            values = (id,)
+            cur.execute(query, values)
+            row = cur.fetchone()
+            return Pet(*row)
 
 
 def level_max_experience(level: int):

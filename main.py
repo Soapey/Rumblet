@@ -1,4 +1,8 @@
 # import pygame
+from rumblet.classes.db.SQLiteConnector import initialise_db
+
+from rumblet.classes.player.Player import Player
+from rumblet.classes.Pet import Pet
 
 
 GAME_NAME = "Rumblet"
@@ -7,24 +11,19 @@ SCREEN_HEIGHT = 600
 
 
 def main():
-    from rumblet.classes.Pet import Pet
-    from rumblet.classes.PetMove import PetMove
+    initialise_db()
 
-    my_pet = Pet(id=None, player_id=None, species_name="Grasschu", level=1, experience=0, nickname="Grant's Grasschu")
+    player = Player(id=None, name="Grant", money=999_999)
+    player.insert()
+    player.give_max_lockstones()
 
-    my_pet_move_1 = PetMove(id=None, pet_id=None, move_key="Splash", current_fuel=10, pet=my_pet)
-    my_pet.moves[1] = my_pet_move_1
+    pet = Pet(id=None, player_id=player.id, species_name="Grasschu", level=1, experience=0, nickname="custom_nickname")
+    pet.insert()
+    pet.learn("Splash", 1)
 
-    my_pet.give_experience(5_000)
+    target_pet = Pet(id=None, player_id=None, species_name="Grasschu", level=1, experience=0)
 
-    print(f"{my_pet.nickname}'s current attack is {my_pet.current_attack}.")
-
-    target_pet = Pet(id=None, player_id=None, species_name="Grasschu", level=15, experience=0, nickname="Grasschu")
-    target_pet.give_level(3)
-
-    my_pet.use_move(1, target_pet)
-
-    print(f"{target_pet.nickname}'s health is now {target_pet.current_health}/{target_pet.health}.")
+    pet.use_move(1, target_pet)
 
     # pygame.init()
     # screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

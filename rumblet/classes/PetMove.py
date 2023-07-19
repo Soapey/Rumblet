@@ -1,21 +1,59 @@
 from rumblet.classes.MoveList import MoveList
-
+from rumblet.classes.db.SQLiteConnector import SQLiteConnector
 
 class PetMove:
-    def __init__(self, id: int, pet_id: int, move_key: str, current_fuel: int, pet=None):
+    def __init__(self, id: int, pet_id: int, move_name: str, current_fuel: int, pet=None):
         self.id = id
         self.pet_id = pet_id
-        self.move_key = move_key
+        self.move_name = move_name
         self.current_fuel = current_fuel
 
         self.pet = pet
 
-    def get_pet(self):
-        if self.pet:
-            return self.pet
+    def use(self, using_pet, target_pet):
+        move = MoveList.moves.get(self.move_name)
+        if not move:
+            return
 
-    def use(self, target_pet):
-        using_pet = self.get_pet()
-        move = MoveList.moves[self.move_key].ability
-        move(using_pet, target_pet)
+        func = move.ability
+        func(using_pet, target_pet)
+
+    def insert(self):
+        with SQLiteConnector() as cur:
+            query = '''
+                INSERT INTO petmove (pet_id, move_name, current_fuel)
+                VALUES (?, ?, ?)
+            '''
+            values = (self.pet_id, self.move_name, self.current_fuel)
+            cur.execute(query, values)
+            self.id = cur.lastrowid
+
+    def update(self):
+        with SQLiteConnector() as cur:
+            query = '''
+                UPDATE petmove
+                SET pet_id = ?, move_name = ?, current_fuel = ?
+                WHERE id = ?
+            '''
+            values = (self.pet_id, self.move_name, self.current_fuel, self.id)
+            cur.execute(query, values)
+
+    @classmethod
+    def delete(cls, id):
+        with SQLiteConnector() as cur:
+            query = "DELETE FROM petmove WHERE id = ?"
+            values = (id,)
+            cur.execute(query, values)
+
+    @classmethod
+    def get_by_pet_id_and_move_name(cls, pet_id, move_name):
+        with SQLiteConnector() as cur:
+            query = '''
+                SELECT * FROM petmove
+                WHERE pet_id = ? AND move_name = ?
+            '''
+            values = (pet_id, move_name)
+            cur.execute(query, values)
+            row = cur.fetchone()
+            return PetMove(*row)
 
