@@ -16,6 +16,22 @@ class Player:
         PlayerLockstone(None, self.id, LockstoneList.arcanum_lockstone.name, 999).insert()
         PlayerLockstone(None, self.id, LockstoneList.divine_lockstone.name, 999).insert()
 
+    def get_lockstone_by_name(self, lockstone_name):
+        with SQLiteConnector() as cur:
+            query = '''
+                SELECT * FROM playerlockstone
+                WHERE player_id = ? AND lockstone_name = ?
+            '''
+            values = (self.id, lockstone_name)
+            cur.execute(query, values)
+            row = cur.fetchone()
+            playerlockstone = PlayerLockstone(*row)
+
+            if not playerlockstone.count:
+                return None
+
+            return LockstoneList.lockstones.get(playerlockstone.lockstone_name)
+
     def insert(self):
         with SQLiteConnector() as cur:
             query = '''

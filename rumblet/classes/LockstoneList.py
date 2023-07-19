@@ -3,12 +3,12 @@ from rumblet.classes.Lockstone import Lockstone
 
 class LockstoneList:
     lockstones = {
-        "Basic Lockstone": Lockstone(name="Basic Lockstone", sprite_path=None, level_1_capture_rate=0.08),
-        "Elemental Lockstone": Lockstone(name="Elemental Lockstone", sprite_path=None, level_1_capture_rate=0.15),
-        "Celestial Lockstone": Lockstone(name="Celestial Lockstone", sprite_path=None, level_1_capture_rate=0.22),
-        "Esoteric Lockstone": Lockstone(name="Esoteric Lockstone", sprite_path=None, level_1_capture_rate=0.35),
-        "Arcanum Lockstone": Lockstone(name="Arcanum Lockstone", sprite_path=None, level_1_capture_rate=0.4),
-        "Divine Lockstone": Lockstone(name="Divine Lockstone", sprite_path=None, level_1_capture_rate=999.0),
+        "Basic Lockstone": Lockstone(name="Basic Lockstone", sprite_path=None, base_capture_rate=0.08),
+        "Elemental Lockstone": Lockstone(name="Elemental Lockstone", sprite_path=None, base_capture_rate=0.15),
+        "Celestial Lockstone": Lockstone(name="Celestial Lockstone", sprite_path=None, base_capture_rate=0.22),
+        "Esoteric Lockstone": Lockstone(name="Esoteric Lockstone", sprite_path=None, base_capture_rate=0.35),
+        "Arcanum Lockstone": Lockstone(name="Arcanum Lockstone", sprite_path=None, base_capture_rate=0.4),
+        "Divine Lockstone": Lockstone(name="Divine Lockstone", sprite_path=None, base_capture_rate=999.0),
     }
     basic_lockstone = lockstones.get("Basic Lockstone")
     elemental_lockstone = lockstones.get("Elemental Lockstone")

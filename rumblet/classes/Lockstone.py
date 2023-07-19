@@ -5,4 +5,4 @@ from dataclasses import dataclass
 class Lockstone:
     name: str
     sprite_path: str
-    level_1_capture_rate: float
+    base_capture_rate: float

@@ -21,9 +21,10 @@ def main():
     pet.insert()
     pet.learn("Splash", 1)
 
-    target_pet = Pet(id=None, player_id=None, species_name="Grasschu", level=1, experience=0)
+    target_pet = Pet(id=None, player_id=None, species_name="Grasskachu", level=17, experience=0)
 
-    pet.use_move(1, target_pet)
+    lockstone = player.get_lockstone_by_name(lockstone_name="Basic Lockstone")
+    target_pet.attempt_catch(player=player, lockstone=lockstone)
 
     # pygame.init()
     # screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
