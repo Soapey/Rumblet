@@ -3,6 +3,8 @@ from rumblet.classes.db.SQLiteConnector import initialise_db
 
 from rumblet.classes.player.Player import Player
 from rumblet.classes.pet.Pet import Pet
+from rumblet.classes.pet.SpeciesList import SpeciesList
+from rumblet.classes.move.MoveList import MoveList
 
 
 GAME_NAME = "Rumblet"
@@ -17,13 +19,16 @@ def main():
     player.insert()
     player.give_max_lockstones()
 
-    pet = Pet(id=None, player_id=player.id, species_name="Grasschu", level=1, experience=0, nickname="custom_nickname")
+    pet = Pet(obj_id=None, player_id=player.id, species_name=SpeciesList.dewleaf.name, level=1, experience=0, nickname="YEAHHH DAT BOI")
     pet.insert()
-    pet.learn("Splash", 1)
+    pet.learn(MoveList.hydrostream_rush.name, 1)
 
-    target_pet = Pet(id=None, player_id=None, species_name="Grasskachu", level=17, experience=0)
+    target_pet = Pet(obj_id=None, player_id=None, species_name=SpeciesList.aqualily.name, level=17, experience=0)
+
+    pet.use_move(1, target_pet)
 
     lockstone = player.get_lockstone_by_name(lockstone_name="Basic Lockstone")
+
     target_pet.attempt_catch(player=player, lockstone=lockstone)
 
     # pygame.init()

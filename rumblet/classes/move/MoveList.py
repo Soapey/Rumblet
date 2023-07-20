@@ -5,16 +5,15 @@ from rumblet.classes.move.MoveType import MoveType
 
 
 def aquamist_veil(using_pet, target_pet):
-    move = MoveList.moves.get(MoveName.AQUAMIST_VEIL.value)
     target_pet.current_defense += 30
-    f"{using_pet.nickname} used {MoveName.AQUAMIST_VEIL.value} on {target_pet.nickname}. DEFENSE +30!"
+    print(f"{using_pet.nickname} used {MoveName.AQUAMIST_VEIL.value} on {target_pet.nickname}. DEFENSE +30!")
 
 
 def hydrostream_rush(using_pet, target_pet):
     move = MoveList.moves.get(MoveName.HYDROSTREAM_RUSH.value)
     damage = calculate_damage(move, using_pet, target_pet)
     target_pet.current_health -= damage
-    f"{using_pet.nickname} used {MoveName.HYDROSTREAM_RUSH.value} on {target_pet.nickname}. CURRENT HEALTH -{damage}!"
+    print(f"{using_pet.nickname} used {MoveName.HYDROSTREAM_RUSH.value} on {target_pet.nickname}. DEALING {damage} DAMAGE!")
 
 
 class MoveList:
@@ -40,6 +39,8 @@ class MoveList:
             move_type=MoveType.ATTACK
         ),
     }
+    aquamist_veil = moves.get(MoveName.AQUAMIST_VEIL.value)
+    hydrostream_rush = moves.get(MoveName.HYDROSTREAM_RUSH.value)
 
 
 def calculate_damage(move, using_pet, target_pet):

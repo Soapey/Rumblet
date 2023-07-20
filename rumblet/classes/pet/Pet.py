@@ -13,31 +13,27 @@ LEVEL_1_EXPERIENCE_REQUIRED = 100
 class Pet:
     def __init__(
             self,
-            id: int | None,
-            player_id: int | None,
-            species_name: str,
-            level: int,
-            experience: int,
-            nickname: str | None = None,
-
-            health: int | None = None,
-            defense: int | None = None,
-            attack: int | None = None,
-            speed: int | None = None,
-
-            current_health: int | None = None,
-            current_defense: int | None = None,
-            current_attack: int | None = None,
-            current_speed: int | None = None,
-
-            move_1_name: str | None = None,
-            move_2_name: str | None = None,
-            move_3_name: str | None = None,
-            move_4_name: str | None = None,
-
-            status_effects: list | None = None
+            obj_id,
+            player_id,
+            species_name,
+            level,
+            experience,
+            nickname,
+            health,
+            defense,
+            attack,
+            speed,
+            current_health,
+            current_defense,
+            current_attack,
+            current_speed,
+            move_1_name,
+            move_2_name,
+            move_3_name,
+            move_4_name,
+            status_effects
     ):
-        self.id = id
+        self.id = obj_id
         self.player_id = player_id
         self.species = SpeciesList.species.get(species_name)
         self.name = species_name
@@ -131,7 +127,7 @@ class Pet:
             return
 
         pet = Pet(
-            id=None,
+            obj_id=None,
             player_id=player.id,
             species_name=self.species.name,
             level=self.level,

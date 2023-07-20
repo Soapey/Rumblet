@@ -18,7 +18,7 @@ class Zone:
         level = random.randint(min_level, max_level)
 
         temp_pet = Pet(
-            id=None,
+            obj_id=None,
             player_id=None,
             species_name=species_name,
             level=level,
@@ -26,10 +26,11 @@ class Zone:
         )
 
         learnable_move_names_at_level = list(temp_pet.learnable_moves_at_level().keys())
-        number_of_moves = random.randint(1, min(4, len(learnable_move_names_at_level)))
+        if learnable_move_names_at_level:
+            number_of_moves = random.randint(1, min(4, len(learnable_move_names_at_level)))
 
-        selected_moves = random.sample(learnable_move_names_at_level, number_of_moves)
-        for move_slot, move_name in enumerate(selected_moves, start=1):
-            setattr(temp_pet, f"move_{move_slot}_name", move_name)
+            selected_moves = random.sample(learnable_move_names_at_level, number_of_moves)
+            for move_slot, move_name in enumerate(selected_moves, start=1):
+                setattr(temp_pet, f"move_{move_slot}_name", move_name)
 
         return temp_pet
