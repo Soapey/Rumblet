@@ -2,7 +2,7 @@
 from rumblet.classes.db.SQLiteConnector import initialise_db
 
 from rumblet.classes.player.Player import Player
-from rumblet.classes.Pet import Pet
+from rumblet.classes.pet.Pet import Pet
 
 
 GAME_NAME = "Rumblet"

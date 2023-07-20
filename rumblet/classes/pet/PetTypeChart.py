@@ -1,4 +1,4 @@
-from rumblet.classes.PetType import PetType
+from rumblet.classes.pet.PetType import PetType
 
 
 class PetTypeChart:

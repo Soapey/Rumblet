@@ -1,4 +1,4 @@
-from rumblet.classes.Lockstone import Lockstone
+from rumblet.classes.lockstone.Lockstone import Lockstone
 
 
 class LockstoneList:

@@ -1,6 +1,6 @@
 from rumblet.classes.db.SQLiteConnector import SQLiteConnector
 from rumblet.classes.player.PlayerLockstone import PlayerLockstone
-from rumblet.classes.LockstoneList import LockstoneList
+from rumblet.classes.lockstone.LockstoneList import LockstoneList
 
 class Player:
     def __init__(self, id, name, money):

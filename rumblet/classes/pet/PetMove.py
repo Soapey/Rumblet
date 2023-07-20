@@ -1,4 +1,4 @@
-from rumblet.classes.MoveList import MoveList
+from rumblet.classes.move.MoveList import MoveList
 from rumblet.classes.db.SQLiteConnector import SQLiteConnector
 
 class PetMove:

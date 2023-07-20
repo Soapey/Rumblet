@@ -1,9 +1,10 @@
-from functools import reduce
-from rumblet.classes.SpeciesList import SpeciesList
-from rumblet.classes.db.SQLiteConnector import SQLiteConnector
-from rumblet.classes.PetMove import PetMove
-from rumblet.classes.MoveList import MoveList
 import random
+from functools import reduce
+
+from rumblet.classes.db.SQLiteConnector import SQLiteConnector
+from rumblet.classes.move.MoveList import MoveList
+from rumblet.classes.pet.PetMove import PetMove
+from rumblet.classes.pet.SpeciesList import SpeciesList
 
 MAX_LEVEL = 100
 LEVEL_1_EXPERIENCE_REQUIRED = 100
@@ -46,7 +47,7 @@ class Pet:
             self.status_effects = list()
 
         if level > 1 and not self.id:
-            self.give_level(levels=level-1, provide_summary=False)
+            self.give_level(levels=level - 1, provide_summary=False)
 
     # How the class will appear to players in a string
     def __str__(self):
@@ -57,8 +58,33 @@ class Pet:
         attributes_string = ', '.join(f'{k}={v}' for k, v in vars(self).items())
         return f"{self.__class__.__name__}-{self.name}({attributes_string})"
 
-    def level_attribute(self, attribute):
-        return self.get_attribute_increase_amount(goal_level=self.level, attribute=attribute)
+    def move_names(self):
+        return {
+            1: self.move_1_name,
+            2: self.move_2_name,
+            3: self.move_3_name,
+            4: self.move_4_name,
+        }
+
+    def learnable_moves_at_level(self):
+        evol = self.get_first_evolution()
+
+        main_learnable_moves = dict()
+
+        calculating = True
+        while calculating:
+            learnable_moves = evol.learnable_moves
+            learnable_moves_below_current_level = {move_name for learned_at_level, move_name in learnable_moves.items() if learned_at_level <= self.level}
+
+            for move_name in learnable_moves_below_current_level:
+                main_learnable_moves[move_name] = MoveList.moves.get(move_name)
+
+            evol = SpeciesList.next_evolution(evol)
+
+            if evol == SpeciesList.next_evolution(self.species):
+                calculating = False
+
+        return main_learnable_moves
 
     def catch_successful(self, lockstone):
         if self.player_id:
@@ -66,7 +92,7 @@ class Pet:
 
         lockstone_rate = lockstone.base_capture_rate
         level_rate_increase = (0.01 * min(0, (MAX_LEVEL // 2) - self.level)) - (
-                    0.01 * min(0, self.level - (MAX_LEVEL // 2)))
+                0.01 * min(0, self.level - (MAX_LEVEL // 2)))
         status_effect_rate_increase = 0.1 * len(self.status_effects)
         health_rate_increase = 0.5 * ((self.health - self.current_health) / self.health)
 
@@ -240,24 +266,19 @@ class Pet:
                 self.update_stat_levels(provide_summary=provide_summary)
 
     def get_first_evolution(self):
-        previous_evolution = SpeciesList.species.get(self.species.previous_evolution_name)
-        if not previous_evolution:
-            return self.species
+        evol = self.species
 
-        loop_evolution = previous_evolution
-        while loop_evolution:
-            loop_evolution = SpeciesList.species.get(loop_evolution.previous_evolution_name)
-            if loop_evolution:
-                previous_evolution = loop_evolution
+        while SpeciesList.previous_evolution(evol):
+            evol = SpeciesList.previous_evolution(evol)
 
-        return previous_evolution
+        return evol
 
     def get_attribute_increase_amount(self, attribute):
 
         attr_start = getattr(self.species, attribute) or 0
 
         attr_end = getattr(self.species, f"end_{attribute}") \
-              or getattr(SpeciesList.species.get(self.species.evolution_name), attribute)
+                   or getattr(SpeciesList.species.get(self.species.evolution_name), attribute)
 
         attr_range = attr_end - attr_start
 
@@ -281,9 +302,11 @@ class Pet:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
             values = (
-            self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health, self.defense,
-            self.attack, self.speed, self.current_health, self.current_defense, self.current_attack, self.current_speed,
-            self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name)
+                self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health,
+                self.defense,
+                self.attack, self.speed, self.current_health, self.current_defense, self.current_attack,
+                self.current_speed,
+                self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name)
             cur.execute(query, values)
             self.id = cur.lastrowid
 
@@ -295,9 +318,11 @@ class Pet:
                 WHERE id = ?
             '''
             values = (
-            self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health, self.defense,
-            self.attack, self.speed, self.current_health, self.current_defense, self.current_attack, self.current_speed,
-            self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.id)
+                self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health,
+                self.defense,
+                self.attack, self.speed, self.current_health, self.current_defense, self.current_attack,
+                self.current_speed,
+                self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.id)
             cur.execute(query, values)
 
     @classmethod
