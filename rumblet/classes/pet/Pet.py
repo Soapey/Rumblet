@@ -13,12 +13,29 @@ LEVEL_1_EXPERIENCE_REQUIRED = 100
 class Pet:
     def __init__(
             self,
-            id: int, player_id: int, species_name: str, level: int, experience: int, nickname: str = None,
-            health: int = None, defense: int = None, attack: int = None, speed: int = None,
-            current_health: int = None, current_defense: int = None, current_attack: int = None,
-            current_speed: int = None,
-            move_1_name: str = None, move_2_name: str = None, move_3_name: str = None, move_4_name: str = None,
-            status_effects: list = None
+            id: int | None,
+            player_id: int | None,
+            species_name: str,
+            level: int,
+            experience: int,
+            nickname: str | None = None,
+
+            health: int | None = None,
+            defense: int | None = None,
+            attack: int | None = None,
+            speed: int | None = None,
+
+            current_health: int | None = None,
+            current_defense: int | None = None,
+            current_attack: int | None = None,
+            current_speed: int | None = None,
+
+            move_1_name: str | None = None,
+            move_2_name: str | None = None,
+            move_3_name: str | None = None,
+            move_4_name: str | None = None,
+
+            status_effects: list | None = None
     ):
         self.id = id
         self.player_id = player_id
@@ -74,7 +91,12 @@ class Pet:
         calculating = True
         while calculating:
             learnable_moves = evol.learnable_moves
-            learnable_moves_below_current_level = {move_name for learned_at_level, move_name in learnable_moves.items() if learned_at_level <= self.level}
+            learnable_moves_below_current_level = {
+                move_name
+                for learned_at_level, move_name
+                in learnable_moves.items()
+                if learned_at_level <= self.level
+            }
 
             for move_name in learnable_moves_below_current_level:
                 main_learnable_moves[move_name] = MoveList.moves.get(move_name)
@@ -188,7 +210,7 @@ class Pet:
 
     def evolve(self, provide_summary, cancelled=False):
         if cancelled:
-            self.update_stat_levels()
+            self.update_stat_levels(provide_summary)
 
         evolution_name = self.species.evolution_name
 
@@ -277,8 +299,9 @@ class Pet:
 
         attr_start = getattr(self.species, attribute) or 0
 
-        attr_end = getattr(self.species, f"end_{attribute}") \
-                   or getattr(SpeciesList.species.get(self.species.evolution_name), attribute)
+        attr_end = \
+            getattr(self.species, f"end_{attribute}") or \
+            getattr(SpeciesList.species.get(self.species.evolution_name), attribute)
 
         attr_range = attr_end - attr_start
 
@@ -298,8 +321,15 @@ class Pet:
     def insert(self):
         with SQLiteConnector() as cur:
             query = '''
-                INSERT INTO pet (player_id, species_name, level, experience, nickname, health, defense, attack, speed, current_health, current_defense, current_attack, current_speed, move_1_name, move_2_name, move_3_name, move_4_name)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO 
+                    pet (
+                        player_id, species_name, level, experience, nickname, 
+                        health, defense, attack, speed, 
+                        current_health, current_defense, current_attack, current_speed, 
+                        move_1_name, move_2_name, move_3_name, move_4_name
+                    )
+                VALUES 
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
             values = (
                 self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health,
@@ -313,9 +343,15 @@ class Pet:
     def update(self):
         with SQLiteConnector() as cur:
             query = '''
-                UPDATE pet
-                SET player_id = ?, species_name = ?, level = ?, experience = ?, nickname = ?, health = ?, defense = ?, attack = ?, speed = ?, current_health = ?, current_defense = ?, current_attack = ?, current_speed = ?, move_1_name = ?, move_2_name = ?, move_3_name = ?, move_4_name = ?
-                WHERE id = ?
+                UPDATE 
+                    pet
+                SET 
+                    player_id = ?, species_name = ?, level = ?, experience = ?, nickname = ?, 
+                    health = ?, defense = ?, attack = ?, speed = ?, 
+                    current_health = ?, current_defense = ?, current_attack = ?, current_speed = ?,
+                    move_1_name = ?, move_2_name = ?, move_3_name = ?, move_4_name = ?
+                WHERE 
+                    id = ?
             '''
             values = (
                 self.player_id, self.species.name, self.level, self.experience, self.nickname, self.health,
@@ -328,7 +364,12 @@ class Pet:
     @classmethod
     def delete(cls, id):
         with SQLiteConnector() as cur:
-            query = f"DELETE FROM pet WHERE id = ?"
+            query = '''
+                DELETE FROM 
+                    pet 
+                WHERE 
+                    id = ?
+            '''
             values = (id,)
             cur.execute(query, values)
 
@@ -336,8 +377,10 @@ class Pet:
     def get_by_id(cls, id):
         with SQLiteConnector() as cur:
             query = '''
-                SELECT * FROM pet
-                WHERE id = ?
+                SELECT * FROM 
+                    pet
+                WHERE 
+                    id = ?
             '''
             values = (id,)
             cur.execute(query, values)
