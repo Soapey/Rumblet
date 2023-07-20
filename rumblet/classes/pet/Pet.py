@@ -19,54 +19,47 @@ class Pet:
             level,
             experience,
             nickname,
-            health,
-            defense,
-            attack,
-            speed,
-            current_health,
-            current_defense,
-            current_attack,
-            current_speed,
-            move_1_name,
-            move_2_name,
-            move_3_name,
-            move_4_name,
-            status_effects
+            health=None,
+            defense=None,
+            attack=None,
+            speed=None,
+            current_health=None,
+            current_defense=None,
+            current_attack=None,
+            current_speed=None,
+            move_1_name=None,
+            move_2_name=None,
+            move_3_name=None,
+            move_4_name=None,
+            status_effects=None
     ):
-        self.id = obj_id
+        self.obj_id = obj_id
         self.player_id = player_id
         self.species = SpeciesList.species.get(species_name)
         self.name = species_name
         self.nickname = nickname or species_name
-        self.level: int = level if self.id else 1
-        self.experience: int = experience
-
+        self.level = level if self.obj_id else 0
+        self.experience = experience
         self.health = health or self.species.health
         self.defense = defense or self.species.defense
         self.attack = attack or self.species.attack
         self.speed = speed or self.species.speed
-
         self.current_health = current_health or self.health
         self.current_defense = current_defense or self.defense
         self.current_attack = current_attack or self.attack
         self.current_speed = current_speed or self.speed
-
         self.move_1_name = move_1_name
         self.move_2_name = move_2_name
         self.move_3_name = move_3_name
         self.move_4_name = move_4_name
+        self.status_effects = status_effects or list()
 
-        if not status_effects:
-            self.status_effects = list()
+        if not self.obj_id:
+            self.give_level(levels=level, provide_summary=False)
 
-        if level > 1 and not self.id:
-            self.give_level(levels=level - 1, provide_summary=False)
-
-    # How the class will appear to players in a string
     def __str__(self):
         return f"{self.name} ({self.level})"
 
-    # How the class will appear to developers in the console
     def __repr__(self):
         attributes_string = ', '.join(f'{k}={v}' for k, v in vars(self).items())
         return f"{self.__class__.__name__}-{self.name}({attributes_string})"
@@ -104,90 +97,25 @@ class Pet:
 
         return main_learnable_moves
 
-    def catch_successful(self, lockstone):
-        if self.player_id:
-            return False
+    def learn(self, move_key, move_slot_number):
 
-        lockstone_rate = lockstone.base_capture_rate
-        level_rate_increase = (0.01 * min(0, (MAX_LEVEL // 2) - self.level)) - (
-                0.01 * min(0, self.level - (MAX_LEVEL // 2)))
-        status_effect_rate_increase = 0.1 * len(self.status_effects)
-        health_rate_increase = 0.5 * ((self.health - self.current_health) / self.health)
-
-        total_rate = lockstone_rate + level_rate_increase + status_effect_rate_increase + health_rate_increase
-
-        squished_total_rate = max(0, min(100, total_rate * 100))
-
-        return random.randint(0, 100) <= squished_total_rate
-
-    def attempt_catch(self, player, lockstone):
-        catch_is_successful = self.catch_successful(lockstone)
-        if not catch_is_successful:
-            print(f"{self.nickname} resisted the Lockstone!")
+        if not self.obj_id:
+            print("Pet must be owned to learn a move!")
             return
 
-        pet = Pet(
-            obj_id=None,
-            player_id=player.id,
-            species_name=self.species.name,
-            level=self.level,
-            experience=self.experience,
-            nickname=self.nickname
-        )
-
-        pet.insert()
-
-        print(f"{player.name} has locked {self.nickname}!")
-
-    def learn(self, move_key, move_slot_number):
-        if move_slot_number == 1:
-            move_to_replace_name = self.move_1_name
-        elif move_slot_number == 2:
-            move_to_replace_name = self.move_2_name
-        elif move_slot_number == 3:
-            move_to_replace_name = self.move_3_name
-        else:
-            move_to_replace_name = self.move_4_name
+        move_to_replace_name = getattr(self, f"move_{move_slot_number}_name")
 
         new_move_max_fuel = MoveList.moves.get(move_key).max_fuel
         if move_to_replace_name:
-            move_to_replace = PetMove.get_by_pet_id_and_move_name(self.id, move_to_replace_name)
-            new_move = PetMove(id=move_to_replace.id, pet_id=self.id, move_name=move_key,
+            move_to_replace = PetMove.get_by_pet_id_and_move_name(self.obj_id, move_to_replace_name)
+            new_move = PetMove(id=move_to_replace.obj_id, pet_id=self.obj_id, move_name=move_key,
                                current_fuel=new_move_max_fuel)
             new_move.update()
         else:
-            new_move = PetMove(id=None, pet_id=self.id, move_name=move_key, current_fuel=new_move_max_fuel)
+            new_move = PetMove(id=None, pet_id=self.obj_id, move_name=move_key, current_fuel=new_move_max_fuel)
             new_move.insert()
 
-        if move_slot_number == 1:
-            self.move_1_name = new_move.move_name
-        elif move_slot_number == 2:
-            self.move_2_name = new_move.move_name
-        elif move_slot_number == 3:
-            self.move_3_name = new_move.move_name
-        else:
-            self.move_4_name = new_move.move_name
-
-    def use_move(self, move_slot_number, target_pet):
-        if move_slot_number == 1:
-            move_name = self.move_1_name
-        elif move_slot_number == 2:
-            move_name = self.move_2_name
-        elif move_slot_number == 3:
-            move_name = self.move_3_name
-        else:
-            move_name = self.move_4_name
-
-        if not move_name:
-            return
-
-        pet_move = PetMove.get_by_pet_id_and_move_name(self.id, move_name)
-
-        if pet_move.current_fuel < 1:
-            print(f"{pet_move.move_name} is out of fuel!")
-            return
-
-        pet_move.use(self, target_pet)
+        setattr(self, f"move_{move_slot_number}_name", new_move.move_name)
 
     def speed_adjust_experience(self, experience):
         return experience * (self.species.leveling_speed / 100)
@@ -314,6 +242,47 @@ class Pet:
 
         return attr_per_level
 
+    def catch_successful(self, lockstone):
+        if self.player_id:
+            return False
+
+        lockstone_rate = lockstone.base_capture_rate
+        level_rate_increase = (0.01 * min(0, (MAX_LEVEL // 2) - self.level)) - (
+                0.01 * min(0, self.level - (MAX_LEVEL // 2)))
+        status_effect_rate_increase = 0.1 * len(self.status_effects)
+        health_rate_increase = 0.5 * ((self.health - self.current_health) / self.health)
+
+        total_rate = lockstone_rate + level_rate_increase + status_effect_rate_increase + health_rate_increase
+
+        squished_total_rate = max(0, min(100, total_rate * 100))
+
+        return random.randint(0, 100) <= squished_total_rate
+
+    def attempt_catch(self, player, lockstone):
+        catch_is_successful = self.catch_successful(lockstone)
+        if not catch_is_successful:
+            print(f"{self.nickname} resisted the Lockstone!")
+            return
+
+        self.player_id = player.obj_id
+
+        self.insert()
+
+        print(f"{player.name} has locked {self.nickname}!")
+
+    def use_move(self, move_slot_number, target_pet):
+        move_name = getattr(self, f"move_{move_slot_number}_name")
+        if not move_name:
+            return
+
+        pet_move = PetMove.get_by_pet_id_and_move_name(self.obj_id, move_name)
+
+        if pet_move.current_fuel < 1:
+            print(f"{pet_move.move_name} is out of fuel!")
+            return
+
+        pet_move.use(self, target_pet)
+
     def insert(self):
         with SQLiteConnector() as cur:
             query = '''
@@ -334,7 +303,7 @@ class Pet:
                 self.current_speed,
                 self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name)
             cur.execute(query, values)
-            self.id = cur.lastrowid
+            self.obj_id = cur.lastrowid
 
     def update(self):
         with SQLiteConnector() as cur:
@@ -354,7 +323,7 @@ class Pet:
                 self.defense,
                 self.attack, self.speed, self.current_health, self.current_defense, self.current_attack,
                 self.current_speed,
-                self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.id)
+                self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.obj_id)
             cur.execute(query, values)
 
     @classmethod
