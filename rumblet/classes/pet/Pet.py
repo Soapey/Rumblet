@@ -18,7 +18,7 @@ class Pet:
             species_name,
             level,
             experience,
-            nickname,
+            nickname=None,
             health=None,
             defense=None,
             attack=None,

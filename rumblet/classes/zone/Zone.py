@@ -4,9 +4,14 @@ from rumblet.classes.pet.Pet import Pet
 
 
 class Zone:
-    def __init__(self, name, species):
+    def __init__(self, name, species, area, zone_up_name=None, zone_down_name=None, zone_left_name=None, zone_right_name=None):
         self.name = name
         self.species = species
+        self.area = area
+        self.zone_up_name = zone_up_name
+        self.zone_down_name = zone_down_name
+        self.zone_left_name = zone_left_name
+        self.zone_right_name = zone_right_name
 
     def get_random_native_pet(self):
         species_names = list(self.species.keys())

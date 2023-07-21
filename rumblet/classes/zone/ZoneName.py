@@ -2,4 +2,5 @@ from enum import Enum
 
 
 class ZoneName(Enum):
-    BRAWLEY = "Brawley"
+    BRAWLEY_UPPER = "Brawley Upper"
+    BRAWLEY_LOWER = "Brawley Lower"
