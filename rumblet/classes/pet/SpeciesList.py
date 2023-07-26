@@ -1,7 +1,9 @@
+from rumblet.classes.move.MoveList import MoveList
 from rumblet.classes.pet.PetTypeChart import PetTypeChart
 from rumblet.classes.pet.Species import Species
 from rumblet.classes.pet.SpeciesName import SpeciesName
-from rumblet.classes.move.MoveList import MoveList
+from rumblet.classes.terrain.TerrainName import TerrainName
+
 
 class SpeciesList:
     species = {
@@ -25,7 +27,8 @@ class SpeciesList:
             learnable_moves={
                 1: MoveList.aquamist_veil.name,
                 8: MoveList.hydrostream_rush.name
-            }
+            },
+            terrains=[TerrainName.WATER.value]
         ),
         SpeciesName.AQUALILY.value: Species(
             dex_no=2,
@@ -44,7 +47,8 @@ class SpeciesList:
             previous_evolution_name=SpeciesName.DEWLEAF.value,
             evolution_name=SpeciesName.TIDALAUREL.value,
             evolution_level=40,
-            learnable_moves={}
+            learnable_moves={},
+            terrains=[TerrainName.WATER.value]
         ),
         SpeciesName.TIDALAUREL.value: Species(
             dex_no=3,
@@ -63,10 +67,11 @@ class SpeciesList:
             previous_evolution_name=SpeciesName.AQUALILY.value,
             evolution_name=None,
             evolution_level=None,
-            learnable_moves={}
+            learnable_moves={},
+            terrains=[TerrainName.WATER.value]
         ),
         SpeciesName.SEEDLETTO.value: Species(
-            dex_no=1,
+            dex_no=4,
             name=SpeciesName.SEEDLETTO.value,
             sprite_path=None,
             type=PetTypeChart.grass,
@@ -79,13 +84,14 @@ class SpeciesList:
             end_attack=None,
             end_speed=None,
             leveling_speed=50,
-            previous_evolution_name=SpeciesName.SEEDLETTO.value,
+            previous_evolution_name=None,
             evolution_name=SpeciesName.FLORABUD.value,
             evolution_level=16,
-            learnable_moves={}
+            learnable_moves={},
+            terrains=[TerrainName.GRASS.value]
         ),
         SpeciesName.FLORABUD.value: Species(
-            dex_no=2,
+            dex_no=5,
             name=SpeciesName.FLORABUD.value,
             sprite_path=None,
             type=PetTypeChart.grass,
@@ -101,10 +107,11 @@ class SpeciesList:
             previous_evolution_name=SpeciesName.SEEDLETTO.value,
             evolution_name=SpeciesName.SYLVAGROVE.value,
             evolution_level=40,
-            learnable_moves={}
+            learnable_moves={},
+            terrains=[TerrainName.GRASS.value]
         ),
         SpeciesName.SYLVAGROVE.value: Species(
-            dex_no=3,
+            dex_no=6,
             name=SpeciesName.SYLVAGROVE.value,
             sprite_path=None,
             type=PetTypeChart.grass,
@@ -120,7 +127,8 @@ class SpeciesList:
             previous_evolution_name=SpeciesName.FLORABUD.value,
             evolution_name=None,
             evolution_level=None,
-            learnable_moves={}
+            learnable_moves={},
+            terrains=[TerrainName.GRASS.value]
         ),
     }
     dewleaf = species.get(SpeciesName.DEWLEAF.value)

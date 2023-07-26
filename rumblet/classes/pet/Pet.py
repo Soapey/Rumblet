@@ -237,7 +237,10 @@ class Pet:
 
         level_range = level_end - level_start
 
-        attr_per_level = int(round(attr_range / level_range, 0))
+        if level_range > 0:
+            attr_per_level = int(round(attr_range / level_range, 0))
+        else:
+            attr_per_level = attr_range
 
         return attr_per_level
 

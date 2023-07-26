@@ -1,7 +1,7 @@
+from rumblet.classes.game.cell import Cells
 from rumblet.classes.pet.SpeciesList import SpeciesList
 from rumblet.classes.zone.Zone import Zone
 from rumblet.classes.zone.ZoneName import ZoneName
-from rumblet.classes.game.cell import Cells
 
 
 class ZonesList:
@@ -13,15 +13,23 @@ class ZonesList:
                     "portions": 13,
                     "min_level": 1,
                     "max_level": 8
+                },
+                SpeciesList.seedletto.name: {
+                    "portions": 13,
+                    "min_level": 1,
+                    "max_level": 8
                 }
             },
-            area=[Cells.GrassCell(3, 1), Cells.GrassCell(4, 1), Cells.GrassCell(16, 19)],
+            area=[
+                Cells.GrassCell(3, 1), Cells.GrassCell(4, 1), Cells.GrassCell(16, 19), Cells.WaterCell(1, 5),
+                Cells.WaterCell(2, 5), Cells.WaterCell(1, 6), Cells.WaterCell(2, 6)
+            ],
             zone_down_name=ZoneName.BRAWLEY_LOWER.value
         ),
         ZoneName.BRAWLEY_LOWER.value: Zone(
             name=ZoneName.BRAWLEY_LOWER.value,
             species={
-                SpeciesList.dewleaf.name: {
+                SpeciesList.seedletto.name: {
                     "portions": 13,
                     "min_level": 1,
                     "max_level": 8

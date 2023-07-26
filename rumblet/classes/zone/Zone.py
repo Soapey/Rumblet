@@ -1,10 +1,12 @@
 import random
 
 from rumblet.classes.pet.Pet import Pet
+from rumblet.classes.pet.SpeciesList import SpeciesList
 
 
 class Zone:
-    def __init__(self, name, species, area, zone_up_name=None, zone_down_name=None, zone_left_name=None, zone_right_name=None):
+    def __init__(self, name, species, area, zone_up_name=None, zone_down_name=None, zone_left_name=None,
+                 zone_right_name=None):
         self.name = name
         self.species = species
         self.area = area
@@ -13,9 +15,28 @@ class Zone:
         self.zone_left_name = zone_left_name
         self.zone_right_name = zone_right_name
 
-    def get_random_native_pet(self):
-        species_names = list(self.species.keys())
-        portions = [self.species[species_name]["portions"] for species_name in species_names]
+    def get_random_native_pet(self, terrains=None):
+
+        if terrains:
+            species_names = [
+                species_name
+                for species_name
+                in self.species.keys()
+                if any(
+                    [
+                        (terrain_name in SpeciesList.species.get(species_name).terrains)
+                        for terrain_name
+                        in terrains
+                    ]
+                )
+            ]
+        else:
+            species_names = list(self.species.keys())
+
+        if not species_names:
+            return None
+
+        portions = [self.species.get(species_name).get("portions") for species_name in species_names]
 
         species_name = random.choices(species_names, weights=portions)[0]
         min_level = self.species[species_name].get("min_level", 1)
