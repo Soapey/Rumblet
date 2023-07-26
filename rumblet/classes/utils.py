@@ -1,4 +1,5 @@
 import os
+from math import ceil
 
 
 def root_directory():
@@ -21,4 +22,15 @@ def is_colliding(left1, top1, width1, height1, left2, top2, width2, height2):
     else:
         return False
 
+def get_grid_index(pixel_value, pixels_per_cell):
+    return ceil(pixel_value / pixels_per_cell)
 
+
+def grid_indexes_are_colliding(x1, y1, x2, y2, pixels_per_cell_x, pixels_per_cell_y):
+    x1_grid_index = get_grid_index(x1, pixels_per_cell_x)
+    y1_grid_index = get_grid_index(y1, pixels_per_cell_y)
+
+    x2_grid_index = get_grid_index(x2, pixels_per_cell_x)
+    y2_grid_index = get_grid_index(y2, pixels_per_cell_y)
+
+    return x1_grid_index == x2_grid_index and y1_grid_index == y2_grid_index

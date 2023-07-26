@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS playerbagitem (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     player_id INTEGER NOT NULL,
     bag_item_name TEXT NOT NULL,
-    quantity INTEGER NOT NULL
+    quantity INTEGER NOT NULL,
     FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE
 );
 

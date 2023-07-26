@@ -5,10 +5,19 @@ from rumblet.classes.game.Colour import Colour
 from rumblet.classes.game.Direction import Direction
 from rumblet.classes.zone.ZonesList import ZonesList
 from rumblet.classes.game.hud.HUDZone import HUDZone
+from rumblet.classes.game.Constants import X_CELLS, Y_CELLS, SCREEN_WIDTH, SCREEN_HEIGHT, FRAME_RATE, WINDOW_TITLE
 
 
 class Game:
-    def __init__(self, x_cells=20, y_cells=20, screen_width=1000, screen_height=1000, frame_rate=120, window_title="Rumblet"):
+    def __init__(
+            self,
+            x_cells=X_CELLS,
+            y_cells=Y_CELLS,
+            screen_width=SCREEN_WIDTH,
+            screen_height=SCREEN_HEIGHT,
+            frame_rate=FRAME_RATE,
+            window_title=WINDOW_TITLE
+    ):
         self.x_cells = x_cells
         self.y_cells = y_cells
         self.screen_width = screen_width
@@ -65,7 +74,13 @@ class Game:
 
         pygame.display.set_caption(self.window_title)
 
-        self.player = Player
+        self.player = Player.create_new_player(
+            name="Grant",
+            max_money=True,
+            max_lockstones=True,
+            width=self.x_pixels_per_cell,
+            height=self.y_pixels_per_cell
+        )
 
         while True:
             for event in pygame.event.get():
