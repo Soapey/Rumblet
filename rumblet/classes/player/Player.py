@@ -88,15 +88,19 @@ class Player:
         if target_x < (self.width // 2):
             zone_left_name = self.zone().zone_left_name
             if zone_left_name:
-                self.current_zone_name = zone_left_name
-                self.update_x(screen_width - (self.width // 2))
+                self.update_x(target_x)
+                if self.x <= 0:
+                    self.current_zone_name = zone_left_name
+                    self.update_x(screen_width)
             else:
                 self.update_x(self.width // 2)
         elif target_x + (self.width // 2) > screen_width:
             zone_right_name = self.zone().zone_right_name
             if zone_right_name:
-                self.current_zone_name = zone_right_name
-                self.update_x(self.width // 2)
+                self.update_x(target_x)
+                if self.x >= screen_width:
+                    self.current_zone_name = zone_right_name
+                    self.update_x(0)
             else:
                 self.update_x(screen_width - (self.width // 2))
         else:
@@ -105,15 +109,19 @@ class Player:
         if target_y < (self.height // 2):
             zone_up_name = self.zone().zone_up_name
             if zone_up_name:
-                self.current_zone_name = zone_up_name
-                self.update_y(screen_height - (self.height // 2))
+                self.update_y(target_y)
+                if self.y <= 0:
+                    self.current_zone_name = zone_up_name
+                    self.update_y(screen_height)
             else:
                 self.update_y(self.height // 2)
         elif target_y + (self.height // 2) > screen_height:
             zone_down_name = self.zone().zone_down_name
             if zone_down_name:
-                self.current_zone_name = zone_down_name
-                self.update_y(self.height // 2)
+                self.update_y(target_y)
+                if self.y >= screen_width:
+                    self.current_zone_name = zone_down_name
+                    self.update_y(0)
             else:
                 self.update_y(screen_height - (self.width // 2))
         else:
