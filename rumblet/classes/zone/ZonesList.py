@@ -33,3 +33,4 @@ class ZonesList:
     }
     brawley_upper = zones.get(ZoneName.BRAWLEY_UPPER.value)
     brawley_lower = zones.get(ZoneName.BRAWLEY_LOWER.value)
+    starting_zone = brawley_lower

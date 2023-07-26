@@ -1,16 +1,18 @@
 CREATE TABLE IF NOT EXISTS player (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    money INTEGER NOT NULL,
-    x INTEGER NOT NULL,
-    y INTEGER NOT NULL
+    current_zone_name TEXT NOT NULL,
+    grid_cell_x INTEGER NOT NULL,
+    grid_cell_y INTEGER NOT NULL,
+    facing_direction INTEGER NOT NULL,
+    money INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS playerlockstone (
+CREATE TABLE IF NOT EXISTS playerbagitem (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     player_id INTEGER NOT NULL,
-    lockstone_name TEXT,
-    count INTEGER,
+    bag_item_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL
     FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE
 );
 

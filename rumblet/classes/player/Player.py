@@ -1,19 +1,23 @@
 import pygame
 
 from rumblet.classes.db.SQLiteConnector import SQLiteConnector
-from rumblet.classes.player.PlayerLockstone import PlayerLockstone
-from rumblet.classes.lockstone.LockstoneList import LockstoneList
 from rumblet.classes.zone.ZonesList import ZonesList
-from rumblet.classes.utils import is_colliding
+from rumblet.classes.bag.BagItemList import BagItemList
+from rumblet.classes.player.PlayerBagItem import PlayerBagItem
+from rumblet.classes.lockstone.LockstoneList import LockstoneList
+
 
 class Player:
-    def __init__(self, id, name, current_zone_name, money=0, x=0, y=0, width=0, height=0, colour=None):
+    def __init__(self, id, name, current_zone_name, grid_cell_x, grid_cell_y, facing_direction=1, money=0, x=None, y=None, width=0, height=0, colour=None):
         self.id = id
         self.name = name
         self.current_zone_name = current_zone_name
+        self.grid_cell_x = grid_cell_x
+        self.grid_cell_y = grid_cell_y
+        self.facing_direction = facing_direction
         self.money = money
-        self.x = x
-        self.y = y
+        self.x = x or grid_cell_x
+        self.y = y or grid_cell_y
         self.width = width
         self.height = height
         self.rect = pygame.Rect(x, y, width, height)
@@ -34,12 +38,16 @@ class Player:
         self.velY = 0
         if self.left_pressed and not self.right_pressed:
             self.velX = -self.speed
+            self.facing_direction = 4
         if self.right_pressed and not self.left_pressed:
             self.velX = self.speed
+            self.facing_direction = 2
         if self.up_pressed and not self.down_pressed:
             self.velY = -self.speed
+            self.facing_direction = 1
         if self.down_pressed and not self.up_pressed:
             self.velY = self.speed
+            self.facing_direction = 3
 
         target_x = self.x + self.velX
         target_y = self.y + self.velY
@@ -78,50 +86,65 @@ class Player:
         else:
             self.y = target_y
 
-        for cell in self.zone().area:
-            colliding = is_colliding(self.x, self.y, self.width, self.height, cell.x, cell.y, self.width, self.height) or is_colliding(cell.x, cell.y, self.width, self.height, self.x, self.y, self.width, self.height)
-
-            if colliding:
-                cell.on_collision(self)
-
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
+    @classmethod
+    def create_new_player(cls, name, max_money=False, max_lockstones=False):
+        player = Player(
+            id=None,
+            name=name,
+            current_zone_name=ZonesList.starting_zone.name,
+            grid_cell_x=1,
+            grid_cell_y=1,
+        )
+        player.insert()
+        player.create_bag()
+        if max_money:
+            player.give_max_money()
+        if max_lockstones:
+            player.give_max_lockstones()
+
+    def create_bag(self):
+        for bag_item_name, bag_item in BagItemList.items.items():
+            player_bag_item = PlayerBagItem(
+                id=None,
+                player_id=self.id,
+                bag_item_name=bag_item_name,
+                quantity=0
+            )
+            player_bag_item.insert()
+
+    def bag(self):
+        return PlayerBagItem.get_all_by_player_id(self.id)
 
     def zone(self):
         return ZonesList.zones.get(self.current_zone_name)
 
+    def give_max_money(self):
+        self.money = 999_999
+        self.update()
 
     def give_max_lockstones(self):
-        PlayerLockstone(None, self.id, LockstoneList.basic_lockstone.name, 999).insert()
-        PlayerLockstone(None, self.id, LockstoneList.elemental_lockstone.name, 999).insert()
-        PlayerLockstone(None, self.id, LockstoneList.celestial_lockstone.name, 999).insert()
-        PlayerLockstone(None, self.id, LockstoneList.esoteric_lockstone.name, 999).insert()
-        PlayerLockstone(None, self.id, LockstoneList.arcanum_lockstone.name, 999).insert()
-        PlayerLockstone(None, self.id, LockstoneList.divine_lockstone.name, 999).insert()
-
-    def get_lockstone_by_name(self, lockstone_name):
-        with SQLiteConnector() as cur:
-            query = '''
-                SELECT * FROM playerlockstone
-                WHERE player_id = ? AND lockstone_name = ?
-            '''
-            values = (self.id, lockstone_name)
-            cur.execute(query, values)
-            row = cur.fetchone()
-            playerlockstone = PlayerLockstone(*row)
-
-            if not playerlockstone.count:
-                return None
-
-            return LockstoneList.lockstones.get(playerlockstone.lockstone_name)
+        bag = self.bag()
+        if not bag:
+            return
+        for lockstone_name in LockstoneList.lockstones.keys():
+            bag.get(lockstone_name).set_item_quantity(999)
 
     def insert(self):
         with SQLiteConnector() as cur:
             query = '''
-                INSERT INTO player (name, money, x, y)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO player (name, current_zone_name, grid_cell_x, grid_cell_y, facing_direction, money)
+                VALUES (?, ?, ?, ?, ?, ?)
             '''
-            values = (self.name, self.money, self.x, self.y)
+            values = (
+                self.name,
+                self.current_zone_name,
+                self.grid_cell_x,
+                self.grid_cell_y,
+                self.facing_direction,
+                self.money
+            )
             cur.execute(query, values)
             self.id = cur.lastrowid
 
@@ -129,10 +152,18 @@ class Player:
         with SQLiteConnector() as cur:
             query = '''
                 UPDATE player
-                SET name = ?, money = ?, x = ?, y = ?
+                SET name = ?, current_zone_name = ?, grid_cell_x = ?, grid_cell_y = ?, facing_direction = ?, money = ?
                 WHERE id = ?
             '''
-            values = (self.name, self.money, self.x, self.y, self.id)
+            values = (
+                self.name,
+                self.current_zone_name,
+                self.grid_cell_x,
+                self.grid_cell_y,
+                self.facing_direction,
+                self.money,
+                self.id
+            )
             cur.execute(query, values)
 
     @classmethod

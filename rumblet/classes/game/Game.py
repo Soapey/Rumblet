@@ -65,18 +65,7 @@ class Game:
 
         pygame.display.set_caption(self.window_title)
 
-        self.player = Player(
-            id=None,
-            name="Grant",
-            current_zone_name=ZonesList.brawley_lower.name,
-            money=999_999,
-            x=150,
-            y=150,
-            width=self.x_pixels_per_cell,
-            height=self.y_pixels_per_cell,
-            colour=(133, 80, 255)
-        )
-        self.player.insert()
+        self.player = Player
 
         while True:
             for event in pygame.event.get():

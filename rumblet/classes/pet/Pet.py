@@ -1,4 +1,3 @@
-import random
 from functools import reduce
 
 from rumblet.classes.db.SQLiteConnector import SQLiteConnector
@@ -242,33 +241,7 @@ class Pet:
 
         return attr_per_level
 
-    def catch_successful(self, lockstone):
-        if self.player_id:
-            return False
 
-        lockstone_rate = lockstone.base_capture_rate
-        level_rate_increase = (0.01 * min(0, (MAX_LEVEL // 2) - self.level)) - (
-                0.01 * min(0, self.level - (MAX_LEVEL // 2)))
-        status_effect_rate_increase = 0.1 * len(self.status_effects)
-        health_rate_increase = 0.5 * ((self.health - self.current_health) / self.health)
-
-        total_rate = lockstone_rate + level_rate_increase + status_effect_rate_increase + health_rate_increase
-
-        squished_total_rate = max(0, min(100, total_rate * 100))
-
-        return random.randint(0, 100) <= squished_total_rate
-
-    def attempt_catch(self, player, lockstone):
-        catch_is_successful = self.catch_successful(lockstone)
-        if not catch_is_successful:
-            print(f"{self.nickname} resisted the Lockstone!")
-            return
-
-        self.player_id = player.obj_id
-
-        self.insert()
-
-        print(f"{player.name} has locked {self.nickname}!")
 
     def use_move(self, move_slot_number, target_pet):
         move_name = getattr(self, f"move_{move_slot_number}_name")
