@@ -190,7 +190,7 @@ class Player:
     @classmethod
     def get_by_id(cls, id):
         with SQLiteConnector() as cur:
-            query = f"SELECT * FROM {cls.table} WHERE id = ?"
+            query = f"SELECT * FROM player WHERE id = ?"
             values = (id,)
             cur.execute(query, values)
             row = cur.fetchone()
@@ -206,7 +206,7 @@ class Player:
 
     def insert(self):
         with SQLiteConnector() as cur:
-            query = '''
+            query = f'''
                 INSERT INTO player (name, current_zone_name, grid_cell_x, grid_cell_y, facing_direction, money)
                 VALUES (?, ?, ?, ?, ?, ?)
             '''

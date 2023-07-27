@@ -1,6 +1,10 @@
 from rumblet.classes.db.SQLiteConnector import SQLiteConnector
+from rumblet.classes.db.SQLiteSchema import SQLiteSchema
+
 
 class PlayerBagItem:
+    table = SQLiteSchema.table_playerbagitem
+
     def __init__(
             self,
             id,
@@ -54,7 +58,7 @@ class PlayerBagItem:
             cur.execute(query, values)
 
     @classmethod
-    def get_all_by_player_id(self, player_id):
+    def get_all_by_player_id(cls, player_id):
         with SQLiteConnector() as cur:
             query = '''
             SELECT * FROM playerbagitem
@@ -65,8 +69,13 @@ class PlayerBagItem:
             rows = cur.fetchall()
             bag = dict()
             for row in rows:
-                bag_item_name = row[2]
-                bag[bag_item_name] = PlayerBagItem(*row)
+                bag_item_name = row[cls.table.get_column_index_by_name("bag_item_name")]
+                bag[bag_item_name] = PlayerBagItem(
+                    id=row[cls.table.get_column_index_by_name("id")],
+                    player_id=row[cls.table.get_column_index_by_name("player_id")],
+                    bag_item_name=bag_item_name,
+                    quantity=row[cls.table.get_column_index_by_name("quantity")]
+                )
 
 
     @classmethod
@@ -79,5 +88,9 @@ class PlayerBagItem:
             values = (player_id, bag_item_name)
             cur.execute(query, values)
             row = cur.fetchone()
-            return PlayerBagItem(*row)
-
+            return PlayerBagItem(
+                    id=row[cls.table.get_column_index_by_name("id")],
+                    player_id=row[cls.table.get_column_index_by_name("player_id")],
+                    bag_item_name=bag_item_name,
+                    quantity=row[cls.table.get_column_index_by_name("quantity")]
+                )

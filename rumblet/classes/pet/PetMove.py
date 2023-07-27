@@ -1,8 +1,11 @@
 from rumblet.classes.move.MoveList import MoveList
 from rumblet.classes.db.SQLiteConnector import SQLiteConnector
+from rumblet.classes.db.SQLiteSchema import SQLiteSchema
 
 
 class PetMove:
+    table = SQLiteSchema.table_petmove
+
     def __init__(
             self,
             id: int | None,
@@ -63,4 +66,9 @@ class PetMove:
             values = (pet_id, move_name)
             cur.execute(query, values)
             row = cur.fetchone()
-            return PetMove(*row)
+            return PetMove(
+                id=row[cls.table.get_column_index_by_name("id")],
+                pet_id=row[cls.table.get_column_index_by_name("pet_id")],
+                move_name=row[cls.table.get_column_index_by_name("move_name")],
+                current_fuel=row[cls.table.get_column_index_by_name("current_fuel")]
+            )
