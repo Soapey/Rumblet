@@ -2,6 +2,7 @@ from random import randint
 
 from rumblet.classes.bag.BagItem import BagItem
 from rumblet.classes.pet.Pet import MAX_LEVEL
+from rumblet.classes.player.PlayerPartyPet import PlayerPartyPet
 
 
 class Lockstone(BagItem):
@@ -45,7 +46,14 @@ class Lockstone(BagItem):
         target_pet.player_id = player.id
         target_pet.insert()
 
-        print(f"{player.name} has locked {target_pet.nickname}!")
+        next_available_party_slot = player.next_available_party_slot()
+        if next_available_party_slot:
+            playerpartypet = PlayerPartyPet.get_by_player_id_and_slot_number(player.id, next_available_party_slot)
+            playerpartypet.pet_id = target_pet.obj_id
+            playerpartypet.update()
+            print(f"{player.name} has locked {target_pet.nickname}!", f"{target_pet.nickname} has been added to party slot {next_available_party_slot}.", sep="\n")
+        else:
+            print(f"{player.name} has locked {target_pet.nickname}!", f"{target_pet.nickname} has been sent to the PC.", sep="\n")
 
     def use(self, player, target_pet):
         self.attempt_catch(player, target_pet)

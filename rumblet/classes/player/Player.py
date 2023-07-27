@@ -7,8 +7,8 @@ from rumblet.classes.player.PlayerBagItem import PlayerBagItem
 from rumblet.classes.lockstone.LockstoneList import LockstoneList
 from rumblet.classes.utils import get_grid_index
 from rumblet.classes.db.SQLiteSchema import SQLiteSchema
-from rumblet.classes.game.Constants import CELL_WIDTH, CELL_HEIGHT
-
+from rumblet.classes.game.Constants import CELL_WIDTH, CELL_HEIGHT, MAX_PARTY_SIZE
+from rumblet.classes.player.PlayerPartyPet import PlayerPartyPet
 
 class Player:
     table = SQLiteSchema.table_player
@@ -154,6 +154,7 @@ class Player:
         )
         player.insert()
         player.create_bag()
+        player.create_party()
         if max_money:
             player.give_max_money()
         if max_lockstones:
@@ -170,8 +171,24 @@ class Player:
             )
             player_bag_item.insert()
 
+    def create_party(self):
+        for slot_number in range(1, MAX_PARTY_SIZE+1):
+            playerpartypet = PlayerPartyPet(
+                id=None,
+                player_id=self.id,
+                pet_id=None,
+                slot_number=slot_number
+            )
+            playerpartypet.insert()
+
     def bag(self):
         return PlayerBagItem.get_all_by_player_id(self.id)
+
+    def party(self):
+        return PlayerPartyPet.get_party_by_player_id(self.id)
+
+    def next_available_party_slot(self):
+        return PlayerPartyPet.next_available_party_slot_by_player_id(self.id)
 
     def zone(self):
         return ZonesList.zones.get(self.current_zone_name)

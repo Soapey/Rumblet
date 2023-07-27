@@ -327,27 +327,61 @@ class Pet:
             values = (id,)
             cur.execute(query, values)
             row = cur.fetchone()
-            return Pet(
-                obj_id=row[cls.table.get_column_index_by_name("id")],
-                player_id=row[cls.table.get_column_index_by_name("player_id")],
-                species_name=row[cls.table.get_column_index_by_name("species_name")],
-                level=row[cls.table.get_column_index_by_name("level")],
-                experience=row[cls.table.get_column_index_by_name("experience")],
-                nickname=row[cls.table.get_column_index_by_name("nickname")],
-                health=row[cls.table.get_column_index_by_name("health")],
-                defense=row[cls.table.get_column_index_by_name("defense")],
-                attack=row[cls.table.get_column_index_by_name("attack")],
-                speed=row[cls.table.get_column_index_by_name("speed")],
-                current_health=row[cls.table.get_column_index_by_name("current_health")],
-                current_defense=row[cls.table.get_column_index_by_name("current_defense")],
-                current_attack=row[cls.table.get_column_index_by_name("current_attack")],
-                current_speed=row[cls.table.get_column_index_by_name("current_speed")],
-                move_1_name=row[cls.table.get_column_index_by_name("move_1_name")],
-                move_2_name=row[cls.table.get_column_index_by_name("move_2_name")],
-                move_3_name=row[cls.table.get_column_index_by_name("move_3_name")],
-                move_4_name=row[cls.table.get_column_index_by_name("move_4_name")],
-            )
+            if row:
+                return Pet(
+                    obj_id=row[cls.table.get_column_index_by_name("id")],
+                    player_id=row[cls.table.get_column_index_by_name("player_id")],
+                    species_name=row[cls.table.get_column_index_by_name("species_name")],
+                    level=row[cls.table.get_column_index_by_name("level")],
+                    experience=row[cls.table.get_column_index_by_name("experience")],
+                    nickname=row[cls.table.get_column_index_by_name("nickname")],
+                    health=row[cls.table.get_column_index_by_name("health")],
+                    defense=row[cls.table.get_column_index_by_name("defense")],
+                    attack=row[cls.table.get_column_index_by_name("attack")],
+                    speed=row[cls.table.get_column_index_by_name("speed")],
+                    current_health=row[cls.table.get_column_index_by_name("current_health")],
+                    current_defense=row[cls.table.get_column_index_by_name("current_defense")],
+                    current_attack=row[cls.table.get_column_index_by_name("current_attack")],
+                    current_speed=row[cls.table.get_column_index_by_name("current_speed")],
+                    move_1_name=row[cls.table.get_column_index_by_name("move_1_name")],
+                    move_2_name=row[cls.table.get_column_index_by_name("move_2_name")],
+                    move_3_name=row[cls.table.get_column_index_by_name("move_3_name")],
+                    move_4_name=row[cls.table.get_column_index_by_name("move_4_name")],
+                )
+            return None
 
+    @classmethod
+    def get_all(cls):
+        with SQLiteConnector() as cur:
+            query = "SELECT * FROM pet"
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            pets = dict()
+            for row in rows:
+                pet = Pet(
+                    obj_id=row[cls.table.get_column_index_by_name("id")],
+                    player_id=row[cls.table.get_column_index_by_name("player_id")],
+                    species_name=row[cls.table.get_column_index_by_name("species_name")],
+                    level=row[cls.table.get_column_index_by_name("level")],
+                    experience=row[cls.table.get_column_index_by_name("experience")],
+                    nickname=row[cls.table.get_column_index_by_name("nickname")],
+                    health=row[cls.table.get_column_index_by_name("health")],
+                    defense=row[cls.table.get_column_index_by_name("defense")],
+                    attack=row[cls.table.get_column_index_by_name("attack")],
+                    speed=row[cls.table.get_column_index_by_name("speed")],
+                    current_health=row[cls.table.get_column_index_by_name("current_health")],
+                    current_defense=row[cls.table.get_column_index_by_name("current_defense")],
+                    current_attack=row[cls.table.get_column_index_by_name("current_attack")],
+                    current_speed=row[cls.table.get_column_index_by_name("current_speed")],
+                    move_1_name=row[cls.table.get_column_index_by_name("move_1_name")],
+                    move_2_name=row[cls.table.get_column_index_by_name("move_2_name")],
+                    move_3_name=row[cls.table.get_column_index_by_name("move_3_name")],
+                    move_4_name=row[cls.table.get_column_index_by_name("move_4_name")],
+                )
+                pets[pet.obj_id] = pet
+
+            return pets
 
 def level_max_experience(level: int):
     exp_add = lambda a: LEVEL_1_EXPERIENCE_REQUIRED * a

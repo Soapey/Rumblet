@@ -166,11 +166,37 @@ class SQLiteSchema:
                 "FOREIGN KEY (pet_id) REFERENCES pet(id) ON DELETE CASCADE",
             ],
         ),
+        "playerpartypet": SQLiteTable(
+            name="playerpartypet",
+            columns={
+                "id": {
+                    "index": 0,
+                    "statement": "id INTEGER PRIMARY KEY AUTOINCREMENT"
+                },
+                "player_id": {
+                    "index": 1,
+                    "statement": "player_id INTEGER NOT NULL"
+                },
+                "pet_id": {
+                    "index": 2,
+                    "statement": "pet_id INTEGER"
+                },
+                "slot_number": {
+                    "index": 4,
+                    "statement": "slot_number INTEGER NOT NULL"
+                }
+            },
+            foreign_keys=[
+                "FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE",
+                "FOREIGN KEY (pet_id) REFERENCES pet(id) ON DELETE CASCADE"
+            ]
+        )
     }
     table_player = tables.get("player")
     table_playerbagitem = tables.get("playerbagitem")
     table_pet = tables.get("pet")
     table_petmove = tables.get("petmove")
+    table_playerpartypet = tables.get("playerpartypet")
 
     @classmethod
     def initialise(cls):
