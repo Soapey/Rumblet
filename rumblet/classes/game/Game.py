@@ -5,7 +5,7 @@ from rumblet.classes.game.Colour import Colour
 from rumblet.classes.game.Direction import Direction
 from rumblet.classes.zone.ZonesList import ZonesList
 from rumblet.classes.game.hud.HUDZone import HUDZone
-from rumblet.classes.game.Constants import X_CELLS, Y_CELLS, SCREEN_WIDTH, SCREEN_HEIGHT, FRAME_RATE, WINDOW_TITLE
+from rumblet.classes.game.Constants import X_CELLS, Y_CELLS, CELL_WIDTH, CELL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, FRAME_RATE, WINDOW_TITLE
 
 
 class Game:
@@ -35,10 +35,10 @@ class Game:
         self.screen.fill(Colour.WHITE.value)
 
     def draw_cell(self, cell):
-        left = cell.x * self.x_pixels_per_cell
-        top = cell.y * self.y_pixels_per_cell
-        width = self.x_pixels_per_cell
-        height = self.y_pixels_per_cell
+        width = CELL_WIDTH
+        height = CELL_HEIGHT
+        left = cell.grid_cell_x * width
+        top = cell.grid_cell_y * height
         rect = pygame.Rect(
             left,
             top,
@@ -77,9 +77,7 @@ class Game:
         self.player = Player.create_new_player(
             name="Grant",
             max_money=True,
-            max_lockstones=True,
-            width=self.x_pixels_per_cell,
-            height=self.y_pixels_per_cell
+            max_lockstones=True
         )
 
         while True:

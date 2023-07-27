@@ -5,11 +5,27 @@ from rumblet.classes.zone.ZonesList import ZonesList
 from rumblet.classes.bag.BagItemList import BagItemList
 from rumblet.classes.player.PlayerBagItem import PlayerBagItem
 from rumblet.classes.lockstone.LockstoneList import LockstoneList
-from rumblet.classes.utils import get_grid_index, grid_indexes_are_colliding
+from rumblet.classes.utils import get_grid_index
+from rumblet.classes.db.SQLiteSchema import SQLiteSchema
+from rumblet.classes.game.Constants import CELL_WIDTH, CELL_HEIGHT
 
 
 class Player:
-    def __init__(self, id, name, current_zone_name, grid_cell_x, grid_cell_y, facing_direction=1, money=0, x=None, y=None, width=0, height=0, colour=None):
+    table = SQLiteSchema.table_player
+
+    def __init__(
+            self,
+            id,
+            name,
+            current_zone_name,
+            grid_cell_x,
+            grid_cell_y,
+            facing_direction=1,
+            money=0,
+            x=None,
+            y=None,
+            colour=None
+    ):
         self.id = id
         self.name = name
         self.current_zone_name = current_zone_name
@@ -17,10 +33,10 @@ class Player:
         self.grid_cell_y = grid_cell_y
         self.facing_direction = facing_direction
         self.money = money
-        self.x = x or grid_cell_x * width
-        self.y = y or grid_cell_y * height
-        self.width = width
-        self.height = height
+        self.width = CELL_WIDTH
+        self.height = CELL_HEIGHT
+        self.x = x or (grid_cell_x * self.width) + (self.width // 2)
+        self.y = y or (grid_cell_y * self.height) + (self.height // 2)
         self.colour = colour or (0, 0, 0)
         self.velX = 0
         self.velY = 0
@@ -44,9 +60,9 @@ class Player:
 
     def check_for_on_collision(self):
         for cell in self.zone().area:
-            cell_center_x = (cell.x * self.width) + (self.width // 2)
-            cell_center_y = (cell.y * self.height) + (self.height // 2)
-            if grid_indexes_are_colliding(self.x, self.y, cell_center_x, cell_center_y, self.width, self.height):
+            player_coords = (self.grid_cell_x, self.grid_cell_y)
+            cell_coords = (cell.grid_cell_x, cell.grid_cell_y)
+            if player_coords == cell_coords:
                 cell.on_collision(self)
                 break
 
@@ -128,15 +144,13 @@ class Player:
             self.update_y(target_y)
 
     @classmethod
-    def create_new_player(cls, name, width, height, max_money=False, max_lockstones=False):
+    def create_new_player(cls, name, max_money=False, max_lockstones=False):
         player = Player(
             id=None,
             name=name,
             current_zone_name=ZonesList.starting_zone.name,
             grid_cell_x=1,
-            grid_cell_y=1,
-            width=width,
-            height=height
+            grid_cell_y=1
         )
         player.insert()
         player.create_bag()
@@ -172,6 +186,23 @@ class Player:
             return
         for lockstone_name in LockstoneList.lockstones.keys():
             bag.get(lockstone_name).set_item_quantity(999)
+
+    @classmethod
+    def get_by_id(cls, id):
+        with SQLiteConnector() as cur:
+            query = f"SELECT * FROM {cls.table} WHERE id = ?"
+            values = (id,)
+            cur.execute(query, values)
+            row = cur.fetchone()
+            return Player(
+                id=row[cls.table.get_column_index_by_name("id")],
+                name=row[cls.table.get_column_index_by_name("name")],
+                current_zone_name=row[cls.table.get_column_index_by_name("current_zone_name")],
+                grid_cell_x=row[cls.table.get_column_index_by_name("grid_cell_x")],
+                grid_cell_y=row[cls.table.get_column_index_by_name("grid_cell_y")],
+                facing_direction=row[cls.table.get_column_index_by_name("facing_direction")],
+                money=row[cls.table.get_column_index_by_name("money")]
+            )
 
     def insert(self):
         with SQLiteConnector() as cur:

@@ -1,14 +1,11 @@
-from rumblet.classes.db.SQLiteConnector import initialise_db
+from rumblet.classes.db.SQLiteSchema import SQLiteSchema
 from rumblet.classes.game.Game import Game
 
 
-
-
 def main():
-    initialise_db()
+    SQLiteSchema.initialise()
     game = Game()
     game.run()
-
 
 
 if __name__ == '__main__':
