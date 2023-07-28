@@ -1,6 +1,6 @@
 import pygame
 from rumblet.classes.game.Colour import Colour
-
+from time import sleep
 
 class Battle:
     def __init__(self, game, other_party):
@@ -22,7 +22,7 @@ class Battle:
         opponent_pet = self.other_party.get(self.opponent_current_pet_party_slot)
 
         player_pet_health_bar = self.ui_font.render(f"{player_pet.nickname} HP: {player_pet.current_health} / {player_pet.health}", True, self.ui_font_colour)
-        opponent_pet_health_bar = self.ui_font.render(f"{opponent_pet.nickname}: {opponent_pet.current_health} / {opponent_pet.health}", True, self.ui_font_colour)
+        opponent_pet_health_bar = self.ui_font.render(f"{opponent_pet.nickname} HP: {opponent_pet.current_health} / {opponent_pet.health}", True, self.ui_font_colour)
 
         self.game.screen.blit(opponent_pet_health_bar, (0, 0))
         self.game.screen.blit(player_pet_health_bar, (0, 50))
