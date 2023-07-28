@@ -2,11 +2,14 @@ import random
 
 from rumblet.classes.pet.Pet import Pet
 from rumblet.classes.pet.SpeciesList import SpeciesList
+from rumblet.classes.game.Colour import Colour
+from rumblet.classes.game.Constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 class Zone:
-    def __init__(self, name, species, area, zone_up_name=None, zone_down_name=None, zone_left_name=None,
+    def __init__(self, game, name, species, area, zone_up_name=None, zone_down_name=None, zone_left_name=None,
                  zone_right_name=None):
+        self.game = game
         self.name = name
         self.species = species
         self.area = area
@@ -14,6 +17,17 @@ class Zone:
         self.zone_down_name = zone_down_name
         self.zone_left_name = zone_left_name
         self.zone_right_name = zone_right_name
+
+    def set_background(self, colour=Colour.WHITE.value):
+        self.game.screen.fill(colour)
+
+    def draw(self):
+        self.set_background()
+        self.game.hud_zone.update_text(self.name)
+        for cell in self.area:
+            cell.draw()
+        self.game.player.draw(self.game.screen)
+        self.game.player.update_loc(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def get_random_native_pet(self, terrains=None):
 

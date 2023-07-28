@@ -182,7 +182,7 @@ class SQLiteSchema:
                     "statement": "pet_id INTEGER"
                 },
                 "slot_number": {
-                    "index": 4,
+                    "index": 3,
                     "statement": "slot_number INTEGER NOT NULL"
                 }
             },
@@ -202,9 +202,4 @@ class SQLiteSchema:
     def initialise(cls):
         with SQLiteConnector() as cur:
             for sqlite_table in cls.tables.values():
-                print(sqlite_table.create_statement())
                 cur.execute(sqlite_table.create_statement())
-
-
-if __name__ == '__main__':
-    print(SQLiteSchema.table_playerbagitem.create_statement())

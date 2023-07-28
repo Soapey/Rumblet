@@ -35,12 +35,12 @@ class Pet:
             move_4_name=None,
             status_effects=None
     ):
-        self.obj_id = obj_id
+        self.id = obj_id
         self.player_id = player_id
         self.species = SpeciesList.species.get(species_name)
         self.name = species_name
         self.nickname = nickname or species_name
-        self.level = level if self.obj_id else 0
+        self.level = level if self.id else 0
         self.experience = experience
         self.health = health or self.species.health
         self.defense = defense or self.species.defense
@@ -56,7 +56,7 @@ class Pet:
         self.move_4_name = move_4_name
         self.status_effects = status_effects or list()
 
-        if not self.obj_id:
+        if not self.id:
             self.give_level(levels=level, provide_summary=False)
 
     def __str__(self):
@@ -101,7 +101,7 @@ class Pet:
 
     def learn(self, move_key, move_slot_number):
 
-        if not self.obj_id:
+        if not self.id:
             print("Pet must be owned to learn a move!")
             return
 
@@ -109,12 +109,12 @@ class Pet:
 
         new_move_max_fuel = MoveList.moves.get(move_key).max_fuel
         if move_to_replace_name:
-            move_to_replace = PetMove.get_by_pet_id_and_move_name(self.obj_id, move_to_replace_name)
-            new_move = PetMove(id=move_to_replace.obj_id, pet_id=self.obj_id, move_name=move_key,
+            move_to_replace = PetMove.get_by_pet_id_and_move_name(self.id, move_to_replace_name)
+            new_move = PetMove(id=move_to_replace.id, pet_id=self.id, move_name=move_key,
                                current_fuel=new_move_max_fuel)
             new_move.update()
         else:
-            new_move = PetMove(id=None, pet_id=self.obj_id, move_name=move_key, current_fuel=new_move_max_fuel)
+            new_move = PetMove(id=None, pet_id=self.id, move_name=move_key, current_fuel=new_move_max_fuel)
             new_move.insert()
 
         setattr(self, f"move_{move_slot_number}_name", new_move.move_name)
@@ -252,7 +252,7 @@ class Pet:
         if not move_name:
             return
 
-        pet_move = PetMove.get_by_pet_id_and_move_name(self.obj_id, move_name)
+        pet_move = PetMove.get_by_pet_id_and_move_name(self.id, move_name)
 
         if pet_move.current_fuel < 1:
             print(f"{pet_move.move_name} is out of fuel!")
@@ -280,7 +280,7 @@ class Pet:
                 self.current_speed,
                 self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name)
             cur.execute(query, values)
-            self.obj_id = cur.lastrowid
+            self.id = cur.lastrowid
 
     def update(self):
         with SQLiteConnector() as cur:
@@ -300,7 +300,7 @@ class Pet:
                 self.defense,
                 self.attack, self.speed, self.current_health, self.current_defense, self.current_attack,
                 self.current_speed,
-                self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.obj_id)
+                self.move_1_name, self.move_2_name, self.move_3_name, self.move_4_name, self.id)
             cur.execute(query, values)
 
     @classmethod
@@ -379,7 +379,7 @@ class Pet:
                     move_3_name=row[cls.table.get_column_index_by_name("move_3_name")],
                     move_4_name=row[cls.table.get_column_index_by_name("move_4_name")],
                 )
-                pets[pet.obj_id] = pet
+                pets[pet.id] = pet
 
             return pets
 

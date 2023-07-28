@@ -1,11 +1,13 @@
-import pygame
 import sys
-from rumblet.classes.player.Player import Player
+
+import pygame
+
 from rumblet.classes.game.Colour import Colour
-from rumblet.classes.game.Direction import Direction
-from rumblet.classes.zone.ZonesList import ZonesList
+from rumblet.classes.game.Constants import X_CELLS, Y_CELLS, SCREEN_WIDTH, SCREEN_HEIGHT, \
+    FRAME_RATE, WINDOW_TITLE
 from rumblet.classes.game.hud.HUDZone import HUDZone
-from rumblet.classes.game.Constants import X_CELLS, Y_CELLS, CELL_WIDTH, CELL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, FRAME_RATE, WINDOW_TITLE
+from rumblet.classes.player.Player import Player
+from rumblet.classes.zone.Zones import Zones
 
 
 class Game:
@@ -30,41 +32,7 @@ class Game:
         self.window_title = window_title
         self.player = None
         self.hud_zone = None
-
-    def set_background(self):
-        self.screen.fill(Colour.WHITE.value)
-
-    def draw_cell(self, cell):
-        width = CELL_WIDTH
-        height = CELL_HEIGHT
-        left = cell.grid_cell_x * width
-        top = cell.grid_cell_y * height
-        rect = pygame.Rect(
-            left,
-            top,
-            width,
-            height
-        )
-        pygame.draw.rect(self.screen, cell.colour, rect)
-
-    def draw_zone(self, zone):
-        self.set_background()
-        for cell in zone.area:
-            self.draw_cell(cell)
-        self.player.draw(self.screen)
-        self.player.update_loc(self.screen_width, self.screen_height)
-
-    def change_zone(self, direction: Direction):
-        current_zone = self.player.zone()
-
-        next_zone_name = getattr(current_zone, f"zone_{direction.value.lower()}_name")
-
-        if not next_zone_name:
-            return
-
-        next_zone = ZonesList.zones.get(next_zone_name)
-
-        self.draw_zone(next_zone)
+        self.battle = None
 
     def run(self):
         pygame.init()
@@ -75,9 +43,10 @@ class Game:
         pygame.display.set_caption(self.window_title)
 
         self.player = Player.create_new_player(
+            game=self,
             name="Grant",
             max_money=True,
-            max_lockstones=True
+            max_lockstones=True,
         )
 
         while True:
@@ -104,8 +73,11 @@ class Game:
                     if event.key == pygame.K_DOWN:
                         self.player.down_pressed = False
 
-            self.draw_zone(self.player.zone())
-            self.hud_zone.update_text(self.player.zone().name)
+            if self.battle is None:
+                player_zone = Zones(self).list.get(self.player.current_zone_name)
+                player_zone.draw()
+            elif self.battle:
+                self.battle.draw()
 
             pygame.display.flip()
 

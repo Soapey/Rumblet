@@ -1,20 +1,24 @@
 import pygame
 
-from rumblet.classes.db.SQLiteConnector import SQLiteConnector
-from rumblet.classes.zone.ZonesList import ZonesList
 from rumblet.classes.bag.BagItemList import BagItemList
-from rumblet.classes.player.PlayerBagItem import PlayerBagItem
-from rumblet.classes.lockstone.LockstoneList import LockstoneList
-from rumblet.classes.utils import get_grid_index
+from rumblet.classes.db.SQLiteConnector import SQLiteConnector
 from rumblet.classes.db.SQLiteSchema import SQLiteSchema
 from rumblet.classes.game.Constants import CELL_WIDTH, CELL_HEIGHT, MAX_PARTY_SIZE
+from rumblet.classes.lockstone.LockstoneList import LockstoneList
+from rumblet.classes.pet.Pet import Pet
+from rumblet.classes.pet.SpeciesName import SpeciesName
+from rumblet.classes.player.PlayerBagItem import PlayerBagItem
 from rumblet.classes.player.PlayerPartyPet import PlayerPartyPet
+from rumblet.classes.utils import get_grid_index
+from rumblet.classes.zone.Zones import Zones
+
 
 class Player:
     table = SQLiteSchema.table_player
 
     def __init__(
             self,
+            game,
             id,
             name,
             current_zone_name,
@@ -24,8 +28,9 @@ class Player:
             money=0,
             x=None,
             y=None,
-            colour=None
+            colour=None,
     ):
+        self.game = game
         self.id = id
         self.name = name
         self.current_zone_name = current_zone_name
@@ -33,10 +38,8 @@ class Player:
         self.grid_cell_y = grid_cell_y
         self.facing_direction = facing_direction
         self.money = money
-        self.width = CELL_WIDTH
-        self.height = CELL_HEIGHT
-        self.x = x or (grid_cell_x * self.width) + (self.width // 2)
-        self.y = y or (grid_cell_y * self.height) + (self.height // 2)
+        self.x = x or (grid_cell_x * CELL_WIDTH) + (CELL_WIDTH // 2)
+        self.y = y or (grid_cell_y * CELL_HEIGHT) + (CELL_HEIGHT // 2)
         self.colour = colour or (0, 0, 0)
         self.velX = 0
         self.velY = 0
@@ -47,29 +50,30 @@ class Player:
         self.speed = 2
 
     def top_left_x(self):
-        return self.x - (self.width // 2)
+        return self.x - (CELL_WIDTH // 2)
 
     def top_left_y(self):
-        return self.y - (self.height // 2)
+        return self.y - (CELL_HEIGHT // 2)
 
     def get_rect(self):
-        return pygame.Rect(self.top_left_x(), self.top_left_y(), self.width, self.height)
+        return pygame.Rect(self.top_left_x(), self.top_left_y(), CELL_WIDTH, CELL_HEIGHT)
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.colour, self.get_rect())
 
     def check_for_on_collision(self):
-        for cell in self.zone().area:
+        zones = Zones(self.game)
+        for cell in zones.list.get(self.current_zone_name).area:
             player_coords = (self.grid_cell_x, self.grid_cell_y)
             cell_coords = (cell.grid_cell_x, cell.grid_cell_y)
             if player_coords == cell_coords:
-                cell.on_collision(self)
+                cell.on_collision(self, zones.list.get(self.current_zone_name))
                 break
 
     def update_x(self, new_x):
         self.x = new_x
         before_grid_cell = self.grid_cell_x
-        after_grid_cell = get_grid_index(self.x, self.width)
+        after_grid_cell = get_grid_index(self.x, CELL_WIDTH)
         self.grid_cell_x = after_grid_cell
         if before_grid_cell != after_grid_cell:
             self.check_for_on_collision()
@@ -77,7 +81,7 @@ class Player:
     def update_y(self, new_y):
         self.y = new_y
         before_grid_cell = self.grid_cell_y
-        after_grid_cell = get_grid_index(self.y, self.height)
+        after_grid_cell = get_grid_index(self.y, CELL_HEIGHT)
         self.grid_cell_y = after_grid_cell
         if before_grid_cell != after_grid_cell:
             self.check_for_on_collision()
@@ -101,65 +105,86 @@ class Player:
         target_x = self.x + self.velX
         target_y = self.y + self.velY
 
-        if target_x < (self.width // 2):
-            zone_left_name = self.zone().zone_left_name
+        player_zone = Zones().list.get(self.current_zone_name)
+
+        if target_x < (CELL_WIDTH // 2):
+            zone_left_name = player_zone.zone_left_name
             if zone_left_name:
                 self.update_x(target_x)
                 if self.x <= 0:
                     self.current_zone_name = zone_left_name
                     self.update_x(screen_width)
             else:
-                self.update_x(self.width // 2)
-        elif target_x + (self.width // 2) > screen_width:
-            zone_right_name = self.zone().zone_right_name
+                self.update_x(CELL_WIDTH // 2)
+        elif target_x + (CELL_WIDTH // 2) > screen_width:
+            zone_right_name = player_zone.zone_right_name
             if zone_right_name:
                 self.update_x(target_x)
                 if self.x >= screen_width:
                     self.current_zone_name = zone_right_name
                     self.update_x(0)
             else:
-                self.update_x(screen_width - (self.width // 2))
+                self.update_x(screen_width - (CELL_WIDTH // 2))
         else:
             self.update_x(target_x)
 
-        if target_y < (self.height // 2):
-            zone_up_name = self.zone().zone_up_name
+        if target_y < (CELL_HEIGHT // 2):
+            zone_up_name = player_zone.zone_up_name
             if zone_up_name:
                 self.update_y(target_y)
                 if self.y <= 0:
                     self.current_zone_name = zone_up_name
                     self.update_y(screen_height)
             else:
-                self.update_y(self.height // 2)
-        elif target_y + (self.height // 2) > screen_height:
-            zone_down_name = self.zone().zone_down_name
+                self.update_y(CELL_HEIGHT // 2)
+        elif target_y + (CELL_HEIGHT // 2) > screen_height:
+            zone_down_name = player_zone.zone_down_name
             if zone_down_name:
                 self.update_y(target_y)
                 if self.y >= screen_width:
                     self.current_zone_name = zone_down_name
                     self.update_y(0)
             else:
-                self.update_y(screen_height - (self.width // 2))
+                self.update_y(screen_height - (CELL_WIDTH // 2))
         else:
             self.update_y(target_y)
 
     @classmethod
-    def create_new_player(cls, name, max_money=False, max_lockstones=False):
+    def create_new_player(cls, game, name, max_money=False, max_lockstones=False):
         player = Player(
+            game=game,
             id=None,
             name=name,
-            current_zone_name=ZonesList.starting_zone.name,
+            current_zone_name=Zones().starting_zone.name,
             grid_cell_x=1,
             grid_cell_y=1
         )
         player.insert()
         player.create_bag()
         player.create_party()
+        player.create_starter_pet()
         if max_money:
             player.give_max_money()
         if max_lockstones:
             player.give_max_lockstones()
         return player
+
+    def create_starter_pet(self):
+        pet = Pet(
+            obj_id=None,
+            player_id=self.id,
+            species_name=SpeciesName.SEEDLETTO.value,
+            level=1,
+            experience=0,
+            nickname="Grant's Starter Pet"
+        )
+        pet.insert()
+
+        next_available_slot_number = PlayerPartyPet.next_available_party_slot_by_player_id(player_id=self.id)
+
+        playerpartypet = PlayerPartyPet.get_by_player_id_and_slot_number(player_id=self.id, slot_number=next_available_slot_number)
+        playerpartypet.pet_id = pet.id
+        playerpartypet.update()
 
     def create_bag(self):
         for bag_item_name, bag_item in BagItemList.items.items():
@@ -190,9 +215,6 @@ class Player:
     def next_available_party_slot(self):
         return PlayerPartyPet.next_available_party_slot_by_player_id(self.id)
 
-    def zone(self):
-        return ZonesList.zones.get(self.current_zone_name)
-
     def give_max_money(self):
         self.money = 999_999
         self.update()
@@ -205,13 +227,14 @@ class Player:
             bag.get(lockstone_name).set_item_quantity(999)
 
     @classmethod
-    def get_by_id(cls, id):
+    def get_by_id(cls, game, id):
         with SQLiteConnector() as cur:
             query = f"SELECT * FROM player WHERE id = ?"
             values = (id,)
             cur.execute(query, values)
             row = cur.fetchone()
             return Player(
+                game=game,
                 id=row[cls.table.get_column_index_by_name("id")],
                 name=row[cls.table.get_column_index_by_name("name")],
                 current_zone_name=row[cls.table.get_column_index_by_name("current_zone_name")],

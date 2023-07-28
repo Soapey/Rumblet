@@ -90,5 +90,5 @@ class PlayerPartyPet:
     def next_available_party_slot_by_player_id(cls, player_id):
         party = cls.get_party_by_player_id(player_id)
         available_slot_numbers = [slot_number for slot_number, pet in party.items() if pet is None]
-        next_available_slot_number = max(available_slot_numbers) + 1
+        next_available_slot_number = min(available_slot_numbers)
         return next_available_slot_number if next_available_slot_number <= 6 else None
