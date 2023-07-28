@@ -41,7 +41,7 @@ class GrassCell(Cell):
                 3: None,
                 4: None
             }
-            battle = Battle(self.game, opponent_party)
+            battle = Battle(self.game, opponent_party, f"A wild {opponent_pet.species.name} appeared!")
             battle.start()
 
 
@@ -58,5 +58,5 @@ class WaterCell(Cell):
                 3: None,
                 4: None
             }
-            battle = Battle(self.game, opponent_party)
+            battle = Battle(self.game, opponent_party, f"A wild {opponent_pet.species.name} appeared!")
             battle.start()

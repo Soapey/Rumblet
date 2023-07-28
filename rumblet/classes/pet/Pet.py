@@ -59,6 +59,7 @@ class Pet:
         if not self.id:
             self.give_level(levels=level, provide_summary=False)
 
+
     def __str__(self):
         return f"{self.name} ({self.level})"
 

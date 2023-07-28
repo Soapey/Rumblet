@@ -173,12 +173,14 @@ class Player:
         pet = Pet(
             obj_id=None,
             player_id=self.id,
-            species_name=SpeciesName.SEEDLETTO.value,
-            level=1,
+            species_name=SpeciesName.DEWLEAF.value,
+            level=3,
             experience=0,
-            nickname="Grant's Starter Pet"
+            nickname="Grant's Starter Pet",
         )
         pet.insert()
+        pet.learn("Hydrostream Rush", 1)
+        pet.update()
 
         next_available_slot_number = PlayerPartyPet.next_available_party_slot_by_player_id(player_id=self.id)
 
